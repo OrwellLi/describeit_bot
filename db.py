@@ -8,7 +8,18 @@ class Database:
  
     def add_user(self, user_id):
         with self.connection:
-            return self.cursor.execute("INSERT INTO `users` (`user_id`) VALUES (?)", (user_id,))
+            a = self.cursor.execute("INSERT INTO `users` (`user_id`) VALUES (?)", (user_id,))
+            return a
+        
+    def add_users_balance(self, user_id):
+        with self.connection:
+            b = self.cursor.execute("INSERT INTO `users_balance` (`user_id`) VALUES (?)", (user_id,))
+            return b
+    
+    def add_users_product(self, user_id):
+        with self.connection:
+            b = self.cursor.execute("INSERT INTO `user_product` (`user_id`) VALUES (?)", (user_id,))
+            return b
 
     def user_exists(self, user_id):
         with self.connection:
@@ -21,7 +32,7 @@ class Database:
     
     def get_signup(self, user_id):
         with self.connection:
-            result = self.cursor.execute("SELECT `signup` FROM `users` WHERE `user_id` = ?", (user_id,)).fetchall()
+            result = self.cursor.execute("SELECT `status` FROM `users` WHERE `user_id` = ?", (user_id,)).fetchall()
             for row in result:
                 signup = str(row[0])
             return signup
@@ -29,7 +40,7 @@ class Database:
 
     def set_signup(self, user_id, signup):
         with self.connection:
-            return self.cursor.execute("UPDATE `users` SET `signup` = ? WHERE `user_id` = ?", (signup, user_id,))
+            return self.cursor.execute("UPDATE `users` SET `status` = ? WHERE `user_id` = ?", (signup, user_id,))
         
     
     def get_nickname(self, user_id):
@@ -41,5 +52,65 @@ class Database:
     
     def check_balance(self, user_id):
         with self.connection:
-            balance = self.cursor.execute("SELECT `balance` FROM `users` WHERE `user_id` = ?", (user_id,)).fetchall()
+            balance = self.cursor.execute("SELECT `user_balance` FROM `users_balance` WHERE `user_id` = ?", (user_id,)).fetchall()
             return balance
+        
+    def minus_balance(self, user_id, balance):
+        with self.connection:
+            return self.cursor.execute("UPDATE `users_balance` SET `user_balance` = user_balance - (?) WHERE `user_id` = ?", (1, user_id,))
+        
+    def get_key(self, user_id):
+        with self.connection:
+            result = self.cursor.execute("SELECT `key` FROM `user_product` WHERE `user_id` = ?", (user_id,)).fetchall()
+            for row in result:
+                signup = str(row[0])
+            return signup
+    
+    def set_key(self, user_id, last_key_phrase):
+        with self.connection:
+            return self.cursor.execute("UPDATE `user_product` SET `key` = ? WHERE `user_id` = ?", (last_key_phrase, user_id,))
+    
+    # def get_product_name(self, user_id):
+    #     with self.connection:
+    #         result = self.cursor.execute("SELECT `product_name` FROM `user_product` WHERE `user_id` = ?", (user_id,)).fetchall()
+    #         for row in result:
+    #             signup = str(row[0])
+    #         return signup
+
+    def set_product_name(self, user_id, prod_name):
+        with self.connection:
+            return self.cursor.execute("UPDATE `user_product` SET `product_name` = ? WHERE `user_id` = ?", (prod_name, user_id,))
+        
+
+    # def get_product_descrip(self, user_id):
+    #     with self.connection:
+    #         result = self.cursor.execute("SELECT `product_descrip` FROM `user_product` WHERE `user_id` = ?", (user_id,)).fetchall()
+    #         for row in result:
+    #             signup = str(row[0])
+    #         return signup
+        
+    def set_product_descrip(self, user_id, prod_descrip):
+        with self.connection:
+            return self.cursor.execute("UPDATE `user_product` SET `product_descrip` = ? WHERE `user_id` = ?", (prod_descrip, user_id,))
+
+    def get_product_key(self, user_id):
+            with self.connection:
+                result = self.cursor.execute("SELECT `product_keys` FROM `user_product` WHERE `user_id` = ?", (user_id,)).fetchall()
+                for row in result:
+                    signup = str(row[0])
+                return signup
+
+    def set_product_key(self, user_id, last_key_phrase):
+        with self.connection:
+            return self.cursor.execute("UPDATE `user_product` SET `product_keys` = ? WHERE `user_id` = ?", (last_key_phrase, user_id,))
+
+    # def set_flag(self, user_id, flag):
+    #     with self.connection:
+    #         return self.cursor.execute("UPDATE `users` SET `flag` = ? WHERE `user_id` = ?", (flag, user_id,))
+    
+    # def get_flag(self, user_id):
+    #     with self.connection:
+    #         result = self.cursor.execute("SELECT `flag` FROM `users` WHERE `user_id` = ?", (user_id,)).fetchall()
+    #         for row in result:
+    #             flag = str(row[0])
+    #         return flag
