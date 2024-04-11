@@ -4,6 +4,8 @@ class WordstatParser:
         self.url = url
         self.token = token
         self.username = username
+        self.left_words = []
+        self.right_words = []
         
     def getClientUnits(self):
         data = {
@@ -16,7 +18,7 @@ class WordstatParser:
         response = json.loads(request.read().decode('utf8'))
         return response
 
-    def createReport(self, phrases, geo = []):
+    def createReport(self, phrases, geo=[]):
         data = {
             'method': 'CreateNewWordstatReport',
             'token': self.token,
@@ -26,7 +28,7 @@ class WordstatParser:
                 }
         }
         data = json.dumps(data, ensure_ascii=False).encode('utf8')
-        request = urllib.request.urlopen(self.url,data) 
+        request = urllib.request.urlopen(self.url, data)
         response = json.loads(request.read().decode('utf8'))
         return response
     
@@ -69,6 +71,7 @@ class WordstatParser:
             for j in report['data'][i]['SearchedWith']:
                 phraseToReport = str(j['Phrase'])
                 phrases.write(phraseToReport+'\n')
+                self.left_words.append(phraseToReport)
                 # showsToReport = str(j['Shows'])
                 # shows.write(showsToReport+'\n')
         phrases.close()
@@ -80,9 +83,13 @@ class WordstatParser:
                 for j in report['data'][i]['SearchedAlso']:
                     phraseToReport = str(j['Phrase'])
                     phrases.write(phraseToReport+'\n')
+                    self.right_words.append(phraseToReport)
                     # showsToReport = str(j['Shows'])
                     # shows.write(showsToReport+'\n')
             phrases.close()
+            # print(self.right_words)
+            # print(self.left_words[1:])
+            return self.right_words, self.left_words[1:]
             # shows.close()
 
         
