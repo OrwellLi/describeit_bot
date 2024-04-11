@@ -14,7 +14,7 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 import aiogram.utils.markdown as md
 from aiogram.enums import ParseMode
-from aiogram.filters import CommandStart, StateFilter
+from aiogram.filters import CommandStart, StateFilter, Command
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from product_description_generator import generate_product_description
@@ -22,7 +22,7 @@ from aiogram.types import Message
 logging.basicConfig(level=logging.INFO)
 
 TOKEN = "7126423804:AAHt8_p1hz0PTY3_ZfTGBqJCq8ULW6BQXN4"
-# api_key = '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'
+api_key = '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'
 logging.basicConfig(level=logging.INFO)
 
 
@@ -34,10 +34,7 @@ bot = Bot(TOKEN)
 router = Router()
 flag = 1
 
-
-
 class Card(StatesGroup):
-    
     set_card_name = State()
     set_card_description = State()
     set_card_keys = State()
@@ -47,8 +44,6 @@ class Promo(StatesGroup):
     promo = State()
 
 
-
-
 @dp.message(CommandStart())
 async def start(message: types.Message):
     global flag
@@ -56,6 +51,7 @@ async def start(message: types.Message):
     markup = InlineKeyboardBuilder()
     markup.row(types.InlineKeyboardButton(text = "Зарегистрироваться", callback_data = "login"))
     await bot.send_message(message.chat.id, f"Для того, <b>чтобы пользоваться ботом</b>, вам нужно <b>зарегистрироваться!</b>",parse_mode=ParseMode.HTML, reply_markup=markup.as_markup())
+    
 flag = 0
 
 @dp.callback_query(F.data == "login")
@@ -69,7 +65,7 @@ async def login(callback_query: types.CallbackQuery):
         await bot.send_message(callback_query.from_user.id, f"<b>Придуймайте никнейм.</b>", parse_mode=ParseMode.HTML)
 
     else:
-        await bot.send_message(callback_query.from_user.id, "<b>Вы уже зарегистрированы!</b>")
+        await bot.send_message(callback_query.from_user.id, "<b>Вы уже зарегистрированы!</b>", parse_mode=ParseMode.HTML)
         await bot.send_sticker(callback_query.from_user.id,"CAACAgIAAxkBAAEL0YxmCKM8rgXl2qdkHb5n5alqcqOypgAC-woAAm80oUssauxdTRu1eDQE")
         markup = InlineKeyboardBuilder()
         markup.add(types.InlineKeyboardButton(text = "Добавить карточку", callback_data = "/keyphrases"))
@@ -84,7 +80,7 @@ async def process_name(message:types.Message, state: FSMContext):
     # db.get_product_name(message.from_user.id)
     # db.set_product_name(message.from_user.id, message.text)
     await state.set_state(Card.set_card_description)
-    await message.answer("Введите описание товара:")
+    await message.answer("Введите характеристики товара:")
     # async with state.proxy() as data:
     #     data['card_name'] = message.text
     await state.update_data(card_name = message.text)
@@ -135,7 +131,8 @@ async def state_promocode(message: types.Message, state: FSMContext):
     else:
         markup = InlineKeyboardBuilder()
         markup.add(types.InlineKeyboardButton(text = "Вернуться ", callback_data = "menu"))
-        await message.answer(f"❌ Вы ввели неправильный промокод!\n\nПопробуйте ввести промокод ещё раз или нажмите кнопку, чтобы вернуться в меню.", parse_mode=ParseMode.HTML, reply_markup=markup.as_markup())
+        await message.answer(f"❌ Вы ввели неправильный промокод!\n\nВернитесь в меню и попробуйте ввести его заново.", parse_mode=ParseMode.HTML, reply_markup=markup.as_markup())
+        await state.clear()
                 
 
     
@@ -195,9 +192,10 @@ async def nicknaming(message: Message, state: FSMContext):
                 markup.add(types.InlineKeyboardButton(text = "Проверить баланс", callback_data = "/balance"))
                 await bot.send_message(message.from_user.id, "Что бы вы хотели сделать?", reply_markup=markup.as_markup())
                 db.set_key( message.from_user.id, "notkey")
+                
             # await bot.send_message(message.from_user.id, "What??")
         elif db.get_key(message.from_user.id) == 'key':
-            if message.text == "addcard":
+            if message.text.lower() == "addcard":
                 # await state.set_state(Card.set_card_name)
                 # await bot.send_message(message.from_user.id, f"📌 <u>The example of the card:</u>\n\n<b>Card NAME:</b>\n\n<b>Card DESCRIPTION:</b>\n\n<b>Card KEY-WORDS:</b>\n\nFor adding a new card description, send the <b>CARD NAME</b>:\n\n",parse_mode = ParseMode.HTML)
                 # # await bot.send_message(message.from_user.id, "For adding a new card description, send <addcard>.\n\nThe example of the card:\n\nCards` name\nCards` description")
@@ -205,7 +203,7 @@ async def nicknaming(message: Message, state: FSMContext):
                 # await message.answer(message.from_user.id, f"Please enter your CARD DESCRIPTION:")
                 await state.set_state(Card.set_card_name)
                 
-                await bot.send_message(message.from_user.id, f"📌 <u>Пример заполнения карточки товара:</u>\n\n<b>Название товара:</b>\n\n<b>Описание товара:</b>\n\n<b>Ключевые слова товара:</b>\n\nДля добавления карточки товара введите <b>название товара</b>:\n\n",parse_mode = ParseMode.HTML)
+                await bot.send_message(message.from_user.id, f"📌 <u>Пример заполнения карточки товара:</u>\n\n<b>Название товара:</b> iPhone 12\n\n<b>Характеристики товара:</b> 128 gb, цвет Graphite, Экран: 6.1' Super Retina XDR. Процессор: A14 Bionic. Сеть: 5G.'\n\n<b>Ключевые слова товара:</b> iPhone, Apple, смартфон, телефоны.\n\nДля добавления карточки товара введите <b>название товара</b>:\n\n",parse_mode = ParseMode.HTML)
                 # await bot.send_message(message.from_user.id, "For adding a new card description, send <addcard>.\n\nThe example of the card:\n\nCards` name\nCards` description")
                 db.set_key(message.from_user.id, "notkey")
             elif message.text != "addcard":
@@ -224,28 +222,6 @@ async def nicknaming(message: Message, state: FSMContext):
                 # markup.add(types.InlineKeyboardButton("Generate?", callback_data = "/generate"))
                 # markup.add(types.InlineKeyboardButton("Back to menu", callback_data = "menu"))
                 # await bot.send_message(message.from_user.id, f"Your key-prase for generating is '{message.text}'\n\n", reply_markup=markup) 
-
-
-# @dp.message()
-# async def entereing(message: Message):
-#     if message.chat.type == "private":
-#         if message.text != "":
-#             await bot.send_sticker(message.from_user.id,"CAACAgIAAxkBAAEL2CRmDsUfOrCE44ssXVrF9aYpasoQEwACvAsAAv0XmUtFBR2JSwp5RzQE")
-#             markup = InlineKeyboardBuilder()
-#             markup.add(types.InlineKeyboardButton(text = "Вернуться ", callback_data = "menu"))
-#             await message.answer(f"❌ Перейдите в меню, чтобы <b>продолжить работу</b> с ботом.", parse_mode=ParseMode.HTML, reply_markup=markup.as_markup())
-
-
-# @dp.callback_query(F.data == "menu", Card.generate)
-# async def menu_def(callback_query: types.CallbackQuery, state: FSMContext):
-#     db.set_key( callback_query.from_user.id, 'notkey')
-#     markup = InlineKeyboardBuilder()
-#     markup.add(types.InlineKeyboardButton("ADD CARD", callback_data = "/keyphrases"))
-#     markup.add(types.InlineKeyboardButton("CHECK MY BALANCE", callback_data = "/balance"))
-#     await bot.send_message(callback_query.from_user.id, f"⚪ <b>What would you like to do?</b>", parse_mode=ParseMode.HTML, reply_markup=markup.as_markup() )
-#     await callback_query.answer()
-#     await state.clear()
-
 
 
 @dp.callback_query(F.data == "/keyphrases")
@@ -291,6 +267,7 @@ async def keyphrases_balance_def(callback_query: types.CallbackQuery):
         markup.add(types.InlineKeyboardButton(text = "Вернуться в меню", callback_data = "menu"))
         await bot.send_message(callback_query.from_user.id, f"💶 У вас <b>{balance}</b> генераций.\n\n Вы хотите <b>купить</b> еще <b>генерации карточек</b>?",parse_mode=ParseMode.HTML, reply_markup=markup.as_markup())
         await callback_query.answer()
+        await callback_query.message.delete()
         flag = 0
 
         
@@ -308,22 +285,26 @@ async def shop_def(callback_query: types.CallbackQuery):
         markup.row(types.InlineKeyboardButton(text = "Вернуться в меню", callback_data = "menu"))
         await bot.send_message(callback_query.from_user.id, f"💶 <b>Выберите опцию</b>, которую хотите приобрести или нажмите <b>Ввести промокод</b>, чтобыв ввести <b>промокод:</b>", parse_mode=ParseMode.HTML,reply_markup=markup.as_markup())
         await callback_query.answer()
+        
         flag = 0
         
 @dp.callback_query(F.data == "/5gens")
 async def shop_onclick_def(callback_query: types.CallbackQuery):
     if callback_query.data == "/5gens":
         await callback_query.answer(text='process buying 5 generations...', show_alert=True)
+        await callback_query.message.delete()
         
 @dp.callback_query(F.data == "/10gens")
 async def shop_onclick_def(callback_query: types.CallbackQuery):
     if callback_query.data == "/10gens":
         await callback_query.answer(text='process buying 10 generations...', show_alert=True)
+        await callback_query.message.delete()
     
 @dp.callback_query(F.data == "/20gens")
 async def shop_onclick_def(callback_query: types.CallbackQuery):
     if callback_query.data == "/20gens":
         await callback_query.answer(text='process buying 20 generations...', show_alert=True)
+        await callback_query.message.delete()
         
 @dp.callback_query(F.data == "/promo")
 async def promo_onclick(callback_query: types.CallbackQuery, state: FSMContext) :
