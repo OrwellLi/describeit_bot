@@ -58,6 +58,10 @@ class Database:
     def minus_balance(self, user_id, balance):
         with self.connection:
             return self.cursor.execute("UPDATE `users_balance` SET `user_balance` = user_balance - (?) WHERE `user_id` = ?", (1, user_id,))
+    
+    def plus_balance(self, user_id, balance):
+        with self.connection:
+            return self.cursor.execute("UPDATE `users_balance` SET `user_balance` = user_balance + (?) WHERE `user_id` = ?", (5, user_id,))
         
     def get_key(self, user_id):
         with self.connection:
@@ -104,13 +108,11 @@ class Database:
         with self.connection:
             return self.cursor.execute("UPDATE `user_product` SET `product_keys` = ? WHERE `user_id` = ?", (last_key_phrase, user_id,))
 
-    # def set_flag(self, user_id, flag):
-    #     with self.connection:
-    #         return self.cursor.execute("UPDATE `users` SET `flag` = ? WHERE `user_id` = ?", (flag, user_id,))
     
-    # def get_flag(self, user_id):
-    #     with self.connection:
-    #         result = self.cursor.execute("SELECT `flag` FROM `users` WHERE `user_id` = ?", (user_id,)).fetchall()
-    #         for row in result:
-    #             flag = str(row[0])
-    #         return flag
+    def get_promo(self, promo_id):
+        with self.connection:
+            result = self.cursor.execute("SELECT `promo_code` FROM `promocodes` WHERE `promo_id` = ?", (promo_id,)).fetchall()
+            for row in result:
+                signup = str(row[0])
+            return signup
+    
