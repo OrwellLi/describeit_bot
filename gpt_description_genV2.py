@@ -4,7 +4,7 @@ import openai
 api_key = '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'  # Замените на ваш реальный API-ключ
 client = openai.OpenAI(api_key=api_key)
 
-def generate_tier2_keywords(product_name, user_keywords, model="gpt-3.5-turbo"):
+def generate_tier2_keywords(product_name, user_keywords, model="gpt-4-turbo"):
     """
     Генерирует список из 10 ключевых слов второго уровня (т.н. тир 2) для товара, основываясь на первичных ключевых словах (т.н. тир 1).
 
@@ -31,7 +31,7 @@ def generate_tier2_keywords(product_name, user_keywords, model="gpt-3.5-turbo"):
     tier2_keywords = response_tier2.choices[0].message.content.strip().split(", ")
     return tier2_keywords
 
-def generate_product_description_V2(product_name, product_features, tier1_keywords, tier2_keywords, model="gpt-3.5-turbo"):
+def generate_product_description_V2(product_name, product_features, tier1_keywords, tier2_keywords, model="gpt-4-turbo-2024-04-09"):
     """
     Генерирует описание товара для российских маркетплейсов, используя ключевые слова тир 1 и тир 2.
 
@@ -45,11 +45,11 @@ def generate_product_description_V2(product_name, product_features, tier1_keywor
     """
     # Формируем запрос для генерации описания
     prompt_final_description = (
-        f"Создайте крутое продажное описание для товара '{product_name}', учитывая следующие условия:\n"
-        f"- Используйте ключевые слова тир 1 (более предпочтительные): {', '.join(tier1_keywords)}.\n"
-        f"- Можете также использовать ключевые слова тир 2 (менее предпочтительные, но релевантные): {', '.join(tier2_keywords)}.\n"
-        f"Характеристики товара: {product_features}.\n"
-        "Главные правила: описание должно быть написано сплошным текстом, без абзацев, без повторов одного слова более 4 раз, и не превышать 3000 символов."
+        f"Создайте продажное описание для товара '{product_name}', учитывая следующие условия:\n"
+        f"- Используйте обязательно ВСЕ ключевые слова тир 1 (введенне): {', '.join(tier1_keywords)}.\n"
+        f"- Можете также использовать ключевые слова тир 2 (менее предпочтительные, но только релевантные): {', '.join(tier2_keywords)}.\n"
+        f"Характеристики товара(должны быть в описание обязательно все): {product_features}.\n"
+        "Главные правила: описание должно быть написано сплошным текстом, без абзацев, без повторов одного слова более 4 раз, и не превышать 3000 символов, текст должен быть без смайликов."
     )
 
     # Выполняем запрос к модели OpenAI
@@ -61,5 +61,5 @@ def generate_product_description_V2(product_name, product_features, tier1_keywor
     # Возвращаем текст без переносов строк
     return response_final.choices[0].message.content.replace("\n", " ")
 
-# Пример использования новой функции V2 для генерации описания товара
+
 
